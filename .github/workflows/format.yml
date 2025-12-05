@@ -1,0 +1,79 @@
+name: 🤖 Auto-format (Main Push)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: 🤖 Format & Commit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: pip
+
+    - name: Install formatting tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install "black==25.11.0" "isort==5.13.2"
+
+    - name: Configure git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+    - name: Run black formatter
+      run: |
+        echo "🤖 Running black..."
+        black s3_mirror.py
+
+    - name: Run isort
+      run: |
+        echo "📦 Running isort..."
+        isort s3_mirror.py
+
+    - name: Check for changes
+      id: changes
+      run: |
+        if git diff --quiet; then
+          echo "changes=false" >> $GITHUB_OUTPUT
+          echo "✅ No formatting changes needed"
+        else
+          echo "changes=true" >> $GITHUB_OUTPUT
+          echo "⚠️ Formatting changes detected"
+          git diff --stat
+        fi
+
+    - name: Commit and push changes
+      if: steps.changes.outputs.changes == 'true'
+      run: |
+        git add s3_mirror.py
+        git commit -m "chore: auto-format code with black and isort
+
+        - Auto-formatted with black (https://github.com/psf/black)
+        - Import ordering fixed with isort (https://pycqa.github.io/isort)
+        - [skip ci]"
+        git push
+
+    - name: Summary
+      run: |
+        echo "✅ Format job complete!"
+        echo "Changes committed: ${{ steps.changes.outputs.changes }}"

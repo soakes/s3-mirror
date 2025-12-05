@@ -1,0 +1,17 @@
+[MASTER]
+# Tell pylint these are valid third‑party packages
+extension-pkg-allow-list=
+    boto3,
+    botocore,
+    urllib3,
+    yaml
+
+[TYPECHECK]
+# Skip strict type checking for these modules
+ignored-modules=
+    boto3,
+    botocore,
+    botocore.config,
+    boto3.s3.transfer,
+    urllib3,
+    yaml
