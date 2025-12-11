@@ -808,7 +808,7 @@ def main():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     logger.info("=" * 70)
-    logger.info("S3 BUCKET MIRROR - Production Edition v1.0.0")
+    logger.info("S3 BUCKET MIRROR")
     logger.info("Session started: %s", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     logger.info("=" * 70)
 
